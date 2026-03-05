@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>FastAPI User Management</title>
+</head>
+
+<body>
+
+<h1>User Management Demo</h1>
+
+<h2>Create User</h2>
+
+<input id="name" placeholder="Name" required><br><br>
+
+<input id="email" type="email" placeholder="Email" required><br><br>
+
+<input id="age" type="number" placeholder="Age" required><br><br>
+
+<button onclick="createUser()">Create User</button>
+
+<h3 id="createResult"></h3>
+
+<hr>
+
+<h2>List Users</h2>
+
+<button onclick="listUsers()">Load Users</button>
+
+<ul id="userList"></ul>
+
+<hr>
+
+<h2>Get User By ID</h2>
+
+<input id="userid" placeholder="Enter User ID">
+<button onclick="getUser()">Get User</button>
+
+<h3 id="userDetails"></h3>
+
+<script>
+
+async function createUser(){
+
+let name = document.getElementById("name").value
+let email = document.getElementById("email").value
+let age = document.getElementById("age").value
+
+if(name === "" || email === "" || age === ""){
+alert("All fields are required")
+return
+}
+
+let response = await fetch("http://127.0.0.1:8000/users", {
+
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+name: name,
+email: email,
+age: parseInt(age)
+})
+
+})
+
+let data = await response.json()
+
+if(data.id){
+document.getElementById("createResult").innerText =
+"User Created with ID: " + data.id
+}else{
+document.getElementById("createResult").innerText =
+"Error: " + JSON.stringify(data)
+}
+
+}
+
+
+async function listUsers(){
+
+let response = await fetch("http://127.0.0.1:8000/users")
+
+let data = await response.json()
+
+let list = document.getElementById("userList")
+
+list.innerHTML = ""
+
+data.forEach(user => {
+
+let li = document.createElement("li")
+
+li.innerText =
+"ID: " + user.id +
+" | " + user.name +
+" | " + user.email +
+" | Age: " + user.age
+
+list.appendChild(li)
+
+})
+
+}
+
+
+async function getUser(){
+
+let id = document.getElementById("userid").value
+
+if(id === ""){
+alert("Enter User ID")
+return
+}
+
+let response = await fetch(`http://127.0.0.1:8000/users/${id}`)
+
+let data = await response.json()
+
+if(data.detail){
+document.getElementById("userDetails").innerText = data.detail
+return
+}
+
+document.getElementById("userDetails").innerText =
+"Name: " + data.name +
+" | Email: " + data.email +
+" | Age: " + data.age
+
+}
+
+</script>
+
+</body>
+
+</html>
